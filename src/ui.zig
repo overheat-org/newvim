@@ -1,4 +1,5 @@
-const webview = @import("webview").WebView;
+const webview = @import("webview").raw;
+const std = @import("std");
 
 const JS =
     \\var h1 = document.createElement("h1")
@@ -7,10 +8,11 @@ const JS =
 ;
 
 pub fn ui() void {
-    const w = webview.create(false, null);
-    defer w.destroy();
-    w.setTitle("Calling Javascript");
-    w.setSize(480, 320, webview.WindowSizeHint.None);
-    w.eval(JS);
-    w.run();
+    // const w = webview.create(false, null);
+    // std.debug.print("raw: {any}", .{webview.webview_version()});
+    // defer w.destroy();
+    // w.setTitle("Calling Javascript");
+    // w.setSize(1024, 720, .None);
+    // // w.eval(JS);
+    // w.run();
 }

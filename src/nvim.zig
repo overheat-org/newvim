@@ -1,41 +1,44 @@
 const std = @import("std");
-const network = @import("network");
+const znvim = @import("znvim");
+
+const tcpConnectToAddress = std.net.tcpConnectToAddress;
+const TcpConnectToAddressError = std.net.TcpConnectToAddressError;
+
 const Self = @This();
 
-pub fn init(address: []const u8, port: u16) !void {
+pub fn init(address: std.net.Address) !void {
     const alloc = std.heap.page_allocator;
 
-    const fmt_address = try std.fmt.allocPrint(alloc, "{s}:{}", .{ address, port });
-    const argv = [_][]const u8{ "nvim", "--headless", "--listen", fmt_address };
-
+    const fmt_address = try std.fmt.allocPrint(alloc, "{}", .{address});
+    const argv = [_][]const u8{
+        "nvim",
+        "--embed",
+        "--headless",
+        "--listen",
+        fmt_address,
+    };
     var process = std.ChildProcess.init(&argv, alloc);
-    alloc.free(fmt_address);
-    // defer _ = process.kill() catch {
-    //     std.debug.print("Can't kill process", .{});
-    // };
 
-    std.debug.print("RUNNING", .{});
-    _ = try process.spawn();
-    std.time.sleep(1000000000 * 5);
+    defer _ = process.kill() catch {
+        std.debug.print("Can't kill process", .{});
+    };
 
-    std.debug.print("INITIALIZING", .{});
+    process.stdin_behavior = .Pipe;
+    process.stdout_behavior = .Pipe;
 
-    try network.init();
-    defer network.deinit();
+    try process.spawn();
 
-    const sock = try network.connectToHost(alloc, address, port, .tcp);
-    defer sock.close();
+    const nvim_stdin = if (process.stdin) |val| val else @panic("not get nvim stdin!");
+    const nvim_stdout = if (process.stdout) |val| val else @panic("not get nvim stdout!");
 
-    const writer = sock.writer();
-    const reader = sock.reader();
+    const nvim = znvim.DefaultClient(.file);
 
-    const msg = "hello world";
+    const arr = try znvim.Payload.arrPayload(0, alloc);
+    defer arr.free(alloc);
 
-    const json_rpc = try std.fmt.allocPrint(alloc, msg, .{});
-    defer alloc.free(json_rpc);
+    var client = try nvim.init(nvim_stdin, nvim_stdout, alloc);
+    const call = try client.call("nvim_win_get_cursor", arr);
+    // call.result
 
-    try writer.writeAll(json_rpc);
-
-    var buf: [128]u8 = undefined;
-    std.debug.print("Echo: {any}", .{buf[0..try reader.readAll(buf[0..msg.len])]});
+    std.debug.print("{any}", .{call.err.arr[1]});
 }

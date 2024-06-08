@@ -17,6 +17,7 @@ pub fn build(b: *std.Build) void {
 
     const network = b.dependency("network", .{ .target = target });
     const webview = b.dependency("webview", .{ .target = target });
+    const znvim = b.dependency("znvim", .{ .target = target });
 
     const exe = b.addExecutable(.{
         .name = "newvim",
@@ -27,7 +28,13 @@ pub fn build(b: *std.Build) void {
 
     exe.root_module.addImport("network", network.module("network"));
     exe.root_module.addImport("webview", webview.module("webview"));
+    exe.root_module.addImport("znvim", znvim.module("znvim"));
 
+    exe.linkLibC();
+    exe.linkLibrary(webview.artifact("webviewStatic"));
+
+    exe.root_module.addAnonymousImport("client-bundle", .{ .root_source_file = b.path("client/dist/bundle.js") });
+    //
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).

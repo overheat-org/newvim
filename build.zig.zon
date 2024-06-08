@@ -19,9 +19,13 @@
             .url = "https://github.com/MasterQ32/zig-network/archive/2caffd7.tar.gz",
             .hash = "122095b1af33a2fbe87af9365516e6c2d21f9f5a6725b539e03bcc6ed8df3c012f39",
         },
+        .znvim = .{
+            .url = "https://github.com/jinzhongjia/znvim/archive/4653d3c.tar.gz",
+            .hash = "12203c56f547fda1600d6fcb8cc775fe06ef7d705c2cfc0d4d57ea876ce2101ce742",
+        },
         .webview = .{
-            .url = "https://github.com/nexusprime-here/webview-zig/archive/refs/heads/main.tar.gz",
-            .hash = "12200a997e374007b533627b4d2cb8cfde086a5e082d89921c81d77e1501a5b7278e",
+            .url = "https://github.com/thechampagne/webview-zig/archive/refs/heads/main.tar.gz",
+            .hash = "1220eeb0f717f9c56966391c9cc28afcd50cde48a5280c2449ca78bb7728986d5164",
         },
     },
     .paths = .{
